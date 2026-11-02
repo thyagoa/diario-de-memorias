@@ -1,0 +1,637 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Memórias">
+<title>Diário de Memórias</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400;1,9..144,500&family=Nunito:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: uma coluna de celular centralizada; no computador, a mesma coluna sobre um fundo rosado com flores nos cantos. Visual único, claro, floral. */
+:root{
+  --bg:#ffffff; --blush:#fff7f9; --blush2:#fff4f7; --line:#f5dde4; --line2:#f0b3c3;
+  --ink:#4a2636; --muted:#7a5563; --accent:#b23a60; --accent-ink:#8f2c4c; --rose:#9a3456; --eyebrow:#b8506f;
+  --leaf-bg:#e9efe3; --leaf-ink:#465e3c; --done:#86a473;
+  --f-display:"Fraunces", Georgia, "Times New Roman", serif;
+  --f-body:"Nunito", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --k:1;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:#fbeef2;color:var(--ink);font:16px/1.5 var(--f-body)}
+.stage{min-height:100%;display:flex;justify-content:center}
+.app{position:relative;width:100%;max-width:520px;min-height:100vh;min-height:100dvh;background:var(--bg);display:flex;flex-direction:column;overflow:hidden}
+@media (min-width:600px){.app{box-shadow:0 0 0 1px var(--line),0 20px 60px rgba(154,52,86,.12)}}
+.deco{position:absolute;pointer-events:none}
+button,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--eyebrow)}
+.serif{font-family:var(--f-display)}
+.it{font-style:italic}
+.muted{color:var(--muted)}
+.btn{min-height:52px;border:0;border-radius:999px;background:var(--accent);color:#fff;font-weight:700;font-size:16px;display:flex;align-items:center;justify-content:center;gap:8px;padding:0 22px;width:100%}
+.btn:hover{background:var(--accent-ink)}
+.btn:disabled{background:#f6dfe6;color:#8a6672;cursor:default}
+.btn.soft{background:var(--blush);color:var(--ink);border:1.5px solid var(--line2)}
+.btn.soft:hover{background:#ffeef3}
+.link{background:none;border:0;color:var(--accent);font-weight:700;font-size:14px;padding:10px 4px;min-height:44px}
+.icon{width:44px;height:44px;display:inline-flex;align-items:center;justify-content:center;border-radius:999px;border:0;background:none;color:var(--ink);flex-shrink:0}
+.icon:hover{background:var(--blush)}
+.sizer{display:flex;gap:4px}
+.sizer button{width:44px;height:44px;border:1.5px solid var(--line2);border-radius:999px;background:var(--blush);font-weight:600}
+.sizer button:disabled{opacity:.4;cursor:default}
+.bar{height:6px;border-radius:3px;background:#fbe6ec;overflow:hidden}
+.bar>i{display:block;height:100%;border-radius:3px;background:var(--accent);transition:width .3s}
+.chip{font-size:11px;font-weight:700;padding:2px 9px;border-radius:999px;white-space:nowrap}
+.chip.L{background:var(--leaf-bg);color:var(--leaf-ink)}
+.chip.M{background:#fde7ee;color:var(--rose)}
+.chip.P{background:#f3dbe3;color:#7a2d45}
+
+/* capa */
+.cover{position:relative;flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;gap:16px;padding:clamp(140px,22vh,190px) 30px 120px}
+.cover h1{margin:0;font:italic 400 42px/1.06 var(--f-display);text-wrap:balance}
+.cover .who{display:flex;flex-direction:column;gap:4px;min-height:70px;justify-content:center}
+.cover .name{font:400 30px/1.15 var(--f-display);color:var(--accent);overflow-wrap:anywhere}
+.cover form{margin-top:auto;width:100%;display:flex;flex-direction:column;gap:12px;text-align:left}
+.cover label{font-weight:700;font-size:14px}
+.cover input{height:54px;width:100%;padding:0 20px;border:1.5px solid var(--line2);border-radius:999px;background:var(--blush);font-size:18px;font-weight:500}
+.cover input::placeholder,textarea::placeholder{color:#a88a95}
+
+/* cabeçalhos */
+.top{position:relative;padding:22px 16px 14px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:12px}
+.toprow{display:flex;align-items:center;gap:8px}
+.toprow .t{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.toprow .t span:first-child{font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--eyebrow)}
+.toprow .t span:last-child{font:italic 400 20px/1.15 var(--f-display)}
+.scroll{flex:1;overflow-y:auto;padding:20px 16px 24px;display:flex;flex-direction:column;gap:16px;position:relative}
+
+/* índice */
+.ihead{position:relative;padding:28px 20px 18px;display:flex;flex-direction:column;gap:14px;border-bottom:1px solid var(--line)}
+.ihead h1{margin:0;font:italic 400 31px/1.1 var(--f-display);padding-right:84px}
+.cont{display:flex;align-items:center;gap:12px;text-align:left;border:0;border-radius:22px;padding:14px 18px;background:var(--accent);color:#fff;width:100%}
+.cont:hover{background:var(--accent-ink)}
+.cont small{font-size:12px;opacity:.9;display:block}
+.cont b{font-size:16px;font-weight:600;line-height:1.3;display:block}
+.chlist{list-style:none;margin:0;padding:0}
+.chrow{display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:4px 10px;align-items:center;width:100%;padding:12px 8px;border:0;border-bottom:1px solid #f8e6ec;background:none;text-align:left;min-height:56px}
+.chrow:hover{background:var(--blush2)}
+.chrow .n{font:italic 400 23px/1 var(--f-display);color:#f2c6d2}
+.chrow.on .n{color:#d9587e}
+.chrow .tt{font-size:15px;font-weight:600;line-height:1.25}
+.chrow .mid{display:flex;flex-direction:column;gap:5px;min-width:0}
+.chrow .bar{height:5px}
+.chrow .bar>i.full{background:var(--done)}
+.chrow .side{display:flex;flex-direction:column;align-items:flex-end;gap:3px}
+.chrow .cnt{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.st-done{background:var(--leaf-bg);color:var(--leaf-ink)}
+.st-go{background:#fde7ee;color:var(--accent)}
+.st-new{color:var(--muted);font-weight:500}
+.paths-tags{display:flex;gap:4px;flex-wrap:wrap}
+.paths-tags span{font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:#fde7ee;color:var(--rose)}
+.paths-tags span.off{background:none;color:var(--muted);text-decoration:line-through;font-weight:500}
+.foot{padding:18px 8px 70px;display:flex;flex-wrap:wrap;gap:4px 16px;justify-content:center}
+.confirm{margin:0 8px;padding:14px;border-radius:16px;background:var(--blush2);border:1px solid var(--line);display:flex;flex-direction:column;gap:10px;font-size:14px}
+.confirm .row{display:flex;gap:8px}
+.confirm .row .btn{min-height:44px;font-size:14px}
+
+/* pergunta */
+.parent{display:flex;flex-direction:column;gap:6px;padding:14px 16px;border-radius:18px;background:var(--blush2);border:1px solid #f8dbe3}
+.parent .lbl{font-size:12px;font-weight:700;color:var(--rose)}
+.parent .q{font-size:calc(14px*var(--k));font-weight:600;line-height:1.35}
+.parent .a{font:italic 400 calc(14px*var(--k))/1.45 var(--f-display);color:#6a3a4c}
+.qmeta{display:flex;align-items:center;gap:10px;font-size:12px;font-weight:600;color:var(--muted)}
+.qtext{margin:0;font:400 calc(26px*var(--k))/1.25 var(--f-display);text-wrap:pretty}
+.ans{display:flex;flex-direction:column;gap:6px}
+.ans label{font-size:13px;font-weight:700;color:var(--muted)}
+textarea{min-height:190px;resize:vertical;width:100%;padding:16px;border:1.5px solid var(--line2);border-radius:20px;background:var(--blush);font-size:calc(16px*var(--k));line-height:1.55}
+.ansrow{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.photo{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 14px;border:1.5px dashed #eba0b4;border-radius:999px;background:transparent;font-weight:600;font-size:13px;cursor:pointer}
+.photo input{position:absolute;width:1px;height:1px;opacity:0}
+.thumbs{display:flex;gap:8px;flex-wrap:wrap}
+.thumbs figure{margin:0;position:relative}
+.thumbs img{width:84px;height:84px;object-fit:cover;border-radius:14px;border:1px solid var(--line);display:block}
+.thumbs button{position:absolute;top:-8px;right:-8px;width:28px;height:28px;border-radius:999px;border:0;background:var(--ink);color:#fff;font-size:14px;line-height:1}
+.note{font-size:12px;color:var(--muted)}
+.next{display:flex;flex-direction:column;gap:4px;padding-top:12px;border-top:1px dashed #f5cdd8}
+.next span:last-child{font-size:calc(14px*var(--k));line-height:1.4;color:var(--muted)}
+.actions{padding:12px 16px 20px;padding-bottom:calc(20px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);display:grid;grid-template-columns:48px minmax(0,1fr) minmax(0,2fr);gap:8px;background:var(--bg)}
+.actions button{height:48px;border-radius:999px;font-weight:700;font-size:15px}
+.actions .ghost{border:1.5px solid var(--line2);background:var(--blush);display:flex;align-items:center;justify-content:center}
+.actions .go{border:0;background:var(--accent);color:#fff}
+.actions .go:hover{background:var(--accent-ink)}
+
+/* escolha */
+.pcard{display:flex;flex-direction:column;gap:12px;width:100%;padding:16px;border-radius:22px;border:2px solid var(--line);background:#fff;text-align:left}
+.pcard[aria-pressed="true"]{border-color:var(--accent);background:var(--blush2)}
+.pcard .r{display:flex;align-items:flex-start;gap:12px}
+.pcard .k{flex-shrink:0;width:36px;height:36px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-weight:700;background:#fde7ee;color:var(--rose)}
+.pcard[aria-pressed="true"] .k{background:var(--accent);color:#fff}
+.pcard .tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.pcard .tx b{font:400 calc(19px*var(--k))/1.2 var(--f-display)}
+.pcard .tx span{font-size:calc(14px*var(--k));line-height:1.45;color:var(--muted)}
+.pcard .ck{flex-shrink:0;width:26px;height:26px;border-radius:999px;border:2px solid #eba0b4;display:flex;align-items:center;justify-content:center;background:#fff}
+.pcard[aria-pressed="true"] .ck{background:var(--accent);border-color:var(--accent)}
+.pcard .ex{display:flex;flex-direction:column;gap:4px;padding-top:10px;border-top:1px dashed #f5cdd8}
+.pcard .ex i{font:italic 400 calc(14px*var(--k))/1.4 var(--f-display);color:#6a3a4c}
+.pcard .ex b{font-size:12px;color:var(--rose)}
+.lead{margin:0;font-size:calc(15px*var(--k));line-height:1.5;color:var(--muted)}
+.h1q{margin:0;font:400 calc(26px*var(--k))/1.25 var(--f-display)}
+.botbar{padding:12px 16px 20px;padding-bottom:calc(20px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);display:flex;flex-direction:column;gap:8px}
+
+/* fim de capítulo */
+.done{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:14px;padding:120px 28px 120px;position:relative}
+.done h1{margin:0;font:italic 400 34px/1.1 var(--f-display);text-wrap:balance}
+.done .stats{display:flex;gap:28px;margin:6px 0}
+.done .stats b{display:block;font:400 30px/1 var(--f-display);color:var(--accent)}
+.done .stats span{font-size:13px;color:var(--muted)}
+.done .btns{width:100%;display:flex;flex-direction:column;gap:10px;margin-top:10px}
+.toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:999px;font-size:14px;z-index:20}
+/* sincronização */
+.syncline{display:flex;align-items:center;gap:8px;align-self:flex-start;border:0;background:none;padding:6px 0;min-height:32px;font-size:12px;color:var(--muted);text-align:left}
+.syncline i{width:8px;height:8px;border-radius:50%;background:var(--done);flex-shrink:0}
+.syncline.err{color:var(--accent-ink);font-weight:600}.syncline.err i{background:var(--accent)}
+.sform{display:flex;flex-direction:column;gap:12px}
+.sform label{font-weight:700;font-size:14px}
+.sform input{height:54px;width:100%;padding:0 20px;border:1.5px solid var(--line2);border-radius:999px;background:var(--blush);font-size:16px;font-weight:500}
+@media (prefers-reduced-motion:reduce){.bar>i{transition:none}}
+</style>
+<style>body{margin:0}[hidden]{display:none!important}img{max-width:100%}</style>
+</head>
+<body>
+
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <g id="flor"><ellipse cx="0" cy="-10" rx="7" ry="10"/><ellipse cx="0" cy="-10" rx="7" ry="10" transform="rotate(72)"/><ellipse cx="0" cy="-10" rx="7" ry="10" transform="rotate(144)"/><ellipse cx="0" cy="-10" rx="7" ry="10" transform="rotate(216)"/><ellipse cx="0" cy="-10" rx="7" ry="10" transform="rotate(288)"/><circle r="5" fill="#fff4f6"/><circle r="2.4" fill="#c9557a"/></g>
+    <g id="folha"><path d="M0 0C7 -8 20 -8 28 0C20 8 7 8 0 0z"/><path d="M2 0H24" fill="none" stroke="#fff" stroke-width="1.2" stroke-linecap="round" opacity=".7"/></g>
+    <g id="botao"><circle r="5"/><circle r="2" fill="#fff4f6"/></g>
+  </defs>
+</svg>
+
+<div class="stage"><div class="app" id="app"></div></div>
+
+<script>
+const DATA = [{"t":"Raízes e família de origem","d":"De onde você vem: pais, avós, irmãos e as histórias que vieram antes de você.","q":[{"n":"Qual é o seu nome completo e quem escolheu esse nome?","p":"L","f":[{"n":"Existe alguma história por trás da escolha do seu nome?","p":"L"},{"n":"Você tinha algum apelido na família? Quem deu e por quê?","p":"L"}]},{"n":"Como se chamavam seus pais e onde eles nasceram?","p":"L","f":[{"n":"Como e onde seus pais se conheceram?","p":"M"},{"n":"O que eles contavam sobre o namoro e o casamento deles?","p":"M"}]},{"n":"Como era o jeito de ser da sua mãe? Descreva ela em poucas palavras.","p":"M","f":[{"n":"Qual é a lembrança mais bonita que você tem dela?","p":"M"},{"n":"O que você herdou dela, no jeito de ser ou na aparência?","p":"P"}]},{"n":"Como era o jeito de ser do seu pai? Descreva ele em poucas palavras.","p":"M","f":[{"n":"Qual é a lembrança mais bonita que você tem dele?","p":"M"},{"n":"O que você herdou dele, no jeito de ser ou na aparência?","p":"P"}]},{"n":"Com o que seus pais trabalhavam?","p":"L","f":[{"n":"Esse trabalho influenciava a rotina da família? De que forma?","p":"M"}]},{"n":"Você conheceu seus avós? Como eles se chamavam?","p":"L","f":[{"n":"Que histórias você ouvia sobre eles, ou contadas por eles?","p":"M"},{"n":"Algum avô ou avó marcou mais a sua vida? Por quê?","p":"M"}]},{"n":"De onde vem a sua família? Houve mudanças de outra cidade, estado ou país?","p":"M","f":[{"n":"Por que eles se mudaram e como foi essa chegada?","p":"M"}]},{"n":"Você tem irmãos? Quais são os nomes e a ordem de nascimento?","p":"L","f":[{"n":"Como era a sua relação com cada um deles na infância?","p":"M"},{"n":"E como é essa relação hoje?","p":"M"}]},{"n":"Havia alguma tradição, receita ou costume passado de geração em geração?","p":"M","f":[{"n":"Você manteve essa tradição? Passou adiante?","p":"M"}]},{"n":"Existe alguma história de família que pouca gente conhece?","p":"P","f":[]},{"n":"Havia tios, tias ou primos muito presentes na sua vida?","p":"L","f":[{"n":"Qual deles tinha a história mais curiosa?","p":"M"}]},{"n":"Como era a vida da família: tinham o necessário, passavam aperto ou viviam com folga?","p":"M","f":[]}],"b":[]},{"t":"Nascimento e primeiros anos","d":"O começo de tudo e as lembranças mais antigas.","q":[{"n":"Quando e onde você nasceu?","p":"L","f":[{"n":"Você nasceu em hospital, em casa ou em outro lugar?","p":"L"},{"n":"O que contam sobre o dia do seu nascimento?","p":"M"}]},{"n":"Como era a cidade ou o bairro na época em que você nasceu?","p":"L","f":[]},{"n":"Qual é a sua lembrança mais antiga?","p":"M","f":[{"n":"Quantos anos você acha que tinha?","p":"L"},{"n":"Por que você acha que essa lembrança ficou guardada?","p":"M"}]},{"n":"Como era a casa onde você passou os primeiros anos?","p":"L","f":[{"n":"Quem morava nessa casa com você?","p":"L"}]},{"n":"Você tinha algum brinquedo, objeto ou bicho de estimação preferido quando era pequeno?","p":"L","f":[]},{"n":"O que sua família contava sobre como você era quando bebê?","p":"M","f":[{"n":"Qual foi a sua primeira palavra, segundo contam?","p":"L"}]},{"n":"Alguém além dos seus pais cuidou de você nessa fase, como avós, tios ou vizinhos?","p":"M","f":[{"n":"O que você lembra dessa pessoa?","p":"M"}]}],"b":[]},{"t":"Infância","d":"Brincadeiras, amigos, regras de casa, medos e sonhos de criança.","q":[{"n":"Do que você mais gostava de brincar?","p":"L","f":[{"n":"Com quem você costumava brincar?","p":"L"},{"n":"Onde eram as brincadeiras: na rua, no quintal, na escola?","p":"L"}]},{"n":"Quem era seu melhor amigo ou amiga de infância?","p":"L","f":[{"n":"O que vocês aprontavam juntos?","p":"M"},{"n":"Vocês ainda têm contato?","p":"M"}]},{"n":"Como era um dia comum na sua infância, do acordar ao dormir?","p":"L","f":[]},{"n":"Qual era a sua comida preferida quando criança? Quem cozinhava?","p":"L","f":[]},{"n":"Como eram os aniversários e as festas de fim de ano na sua família?","p":"M","f":[{"n":"Qual foi o presente mais marcante que você ganhou quando criança?","p":"M"}]},{"n":"Você tinha tarefas em casa? Quais?","p":"L","f":[]},{"n":"Como eram as regras e os castigos na sua casa?","p":"M","f":[{"n":"Você lembra de alguma bronca que ficou na memória?","p":"M"}]},{"n":"Qual foi a maior travessura que você fez?","p":"M","f":[{"n":"Alguém descobriu? O que aconteceu depois?","p":"L"}]},{"n":"Do que você tinha medo quando criança?","p":"M","f":[]},{"n":"O que você queria ser quando crescesse?","p":"L","f":[{"n":"Por que essa escolha? Esse sonho mudou com o tempo?","p":"M"}]},{"n":"Houve algum momento difícil para a família durante a sua infância?","p":"P","f":[{"n":"Como isso afetou você naquela época?","p":"P"}]},{"n":"Qual lembrança de infância você mais gostaria de reviver?","p":"P","f":[]},{"n":"Quais desenhos, programas de rádio ou histórias você acompanhava?","p":"L","f":[]},{"n":"Como eram as férias quando você era criança?","p":"M","f":[{"n":"Para onde vocês iam, ou o que faziam em casa?","p":"L"}]},{"n":"Você se machucou feio alguma vez brincando? O que aconteceu?","p":"L","f":[]},{"n":"Qual cheiro ou sabor leva você de volta à infância?","p":"M","f":[]}],"b":[]},{"t":"Escola","d":"Professores, matérias, recreio e o caminho dos estudos.","q":[{"n":"Em que escola você estudou nos primeiros anos?","p":"L","f":[{"n":"Como você ia para a escola?","p":"L"}]},{"n":"Você lembra do seu primeiro dia de aula?","p":"M","f":[]},{"n":"Qual era sua matéria preferida? E a que você menos gostava?","p":"L","f":[]},{"n":"Teve algum professor ou professora que marcou você?","p":"M","f":[{"n":"O que essa pessoa fez de diferente?","p":"M"}]},{"n":"Você era mais comportado ou mais bagunceiro na escola?","p":"L","f":[]},{"n":"O que você fazia no recreio?","p":"L","f":[]},{"n":"Aconteceu algo engraçado ou constrangedor na escola que você nunca esqueceu?","p":"M","f":[]},{"n":"Qual conquista na escola deixou você mais orgulhoso?","p":"M","f":[]},{"n":"Você participava de atividades fora da sala, como esporte, música, teatro ou grêmio?","p":"M","f":[]},{"n":"Até que ano você estudou?","p":"M","f":[{"n":"Se parou de estudar, o que levou a isso? Você gostaria de ter continuado?","p":"P"},{"n":"Se continuou, o que estudou e por que escolheu esse caminho?","p":"M"}]},{"n":"Você usava uniforme? Como era?","p":"L","f":[]},{"n":"Você já colou em alguma prova? Foi pego?","p":"L","f":[]},{"n":"Como era a relação dos seus pais com a escola e com as suas notas?","p":"M","f":[]}],"b":[]},{"t":"Adolescência","d":"Música, moda, turma, primeiras paixões e o primeiro dinheiro.","q":[{"n":"Como você se descreveria aos 15 anos?","p":"L","f":[]},{"n":"Que músicas, artistas e programas você curtia?","p":"L","f":[{"n":"Tinha algum ídolo? Por quê?","p":"L"}]},{"n":"Como era a moda da época? Que roupa ou penteado você usava?","p":"L","f":[]},{"n":"Quem eram os seus amigos nessa fase?","p":"L","f":[{"n":"O que vocês faziam para se divertir?","p":"M"}]},{"n":"Qual é a primeira festa ou baile de que você se lembra?","p":"M","f":[]},{"n":"Como era a sua relação com seus pais na adolescência?","p":"M","f":[{"n":"Sobre o que vocês mais discordavam?","p":"M"}]},{"n":"Você teve alguma paixão de adolescência?","p":"M","f":[{"n":"Essa pessoa soube do seu sentimento?","p":"M"}]},{"n":"Qual foi a coisa mais ousada que você fez nessa idade?","p":"M","f":[]},{"n":"Com que idade você começou a trabalhar ou a ganhar seu próprio dinheiro?","p":"M","f":[{"n":"No que você gastou o primeiro dinheiro que ganhou?","p":"L"}]},{"n":"O que você diria para você mesmo aos 16 anos, se pudesse?","p":"P","f":[]},{"n":"Qual era o ponto de encontro da sua turma?","p":"L","f":[]},{"n":"Como vocês se comunicavam: cartas, telefone fixo, bilhetes?","p":"M","f":[{"n":"Você guarda alguma carta ou bilhete dessa época?","p":"M"}]},{"n":"Qual era o seu maior sonho aos 15 anos?","p":"M","f":[]}],"b":[]},{"t":"Juventude e começo da vida adulta","d":"As primeiras decisões por conta própria.","q":[{"n":"Quando você sentiu que tinha virado adulto?","p":"M","f":[]},{"n":"Com que idade você saiu da casa dos seus pais, e por qual motivo?","p":"M","f":[{"n":"Como foi a experiência de viver por conta própria?","p":"M"}]},{"n":"Qual foi a primeira grande decisão que você tomou sozinho?","p":"M","f":[]},{"n":"Você fez faculdade, curso técnico ou outro tipo de formação?","p":"L","f":[{"n":"Como foi essa época? Algum momento marcante?","p":"M"}]},{"n":"O que você fazia para se divertir aos 20 e poucos anos?","p":"L","f":[]},{"n":"Quais eram os seus sonhos e planos nessa idade?","p":"M","f":[{"n":"Quais deles se realizaram? E quais ficaram pelo caminho?","p":"P"}]},{"n":"Você tirou carteira de motorista? Qual foi seu primeiro carro ou meio de transporte?","p":"L","f":[]},{"n":"Como era a sua vida financeira no começo da vida adulta?","p":"M","f":[]},{"n":"Qual foi o maior erro que você cometeu nessa fase, e o que aprendeu com ele?","p":"P","f":[]},{"n":"Quem foi a pessoa que mais apoiou você nesse começo de vida adulta?","p":"M","f":[]},{"n":"Que festa, viagem ou experiência marcou a sua juventude?","p":"M","f":[]}],"b":[]},{"t":"Amor e relacionamentos","d":"Paqueras, namoros e o encontro com a pessoa amada.","q":[{"n":"Com que idade você teve o primeiro namoro?","p":"L","f":[{"n":"Como foi esse namoro? Como terminou?","p":"M"}]},{"n":"Como se paquerava na sua época?","p":"M","f":[]},{"n":"Qual foi o encontro mais memorável que você já teve?","p":"M","f":[]},{"n":"Como você conheceu seu parceiro ou parceira de vida?","p":"L","f":[{"n":"Qual foi a sua primeira impressão dessa pessoa?","p":"M"},{"n":"Quem tomou a iniciativa?","p":"L"},{"n":"Como foi o primeiro encontro de vocês?","p":"L"}]},{"n":"O que fez você perceber que era essa pessoa?","p":"M","f":[]},{"n":"Como a sua família reagiu ao relacionamento?","p":"M","f":[]},{"n":"Você já teve o coração partido? Como superou?","p":"P","f":[]},{"n":"O que você aprendeu sobre o amor ao longo da vida?","p":"P","f":[]},{"n":"Qual foi a declaração de amor mais bonita que você fez ou recebeu?","p":"M","f":[]},{"n":"Vocês tinham uma música do casal? Qual?","p":"L","f":[]}],"b":[]},{"t":"Casamento e vida a dois","d":"O pedido, o grande dia e a construção de uma vida juntos.","q":[{"n":"Vocês se casaram? Quando e onde?","p":"L","f":[{"n":"Como foi o pedido?","p":"L"},{"n":"Como foi o dia do casamento? O que você lembra com mais carinho?","p":"M"},{"n":"Teve lua de mel? Para onde vocês foram?","p":"L"}]},{"n":"Como foi o começo da vida juntos?","p":"M","f":[{"n":"Onde vocês foram morar primeiro?","p":"L"}]},{"n":"Qual foi o maior desafio do começo da vida a dois?","p":"M","f":[]},{"n":"O que vocês gostavam de fazer juntos?","p":"L","f":[]},{"n":"Qual é o segredo para um relacionamento durar, na sua opinião?","p":"M","f":[]},{"n":"Qual foi a fase mais difícil do relacionamento e como vocês passaram por ela?","p":"P","f":[]},{"n":"Se um relacionamento importante terminou, o que você leva de bom dessa história?","p":"P","f":[]},{"n":"Como vocês dividiam as tarefas da casa?","p":"L","f":[]},{"n":"Qual é a lembrança mais divertida da vida a dois?","p":"L","f":[]},{"n":"Como vocês comemoravam os aniversários de casamento?","p":"M","f":[]}],"b":[]},{"t":"Filhos","d":"A chegada, a criação e o que muda quando eles crescem.","q":[{"n":"Você sempre quis ter filhos?","p":"L","f":[]},{"n":"Quantos filhos você tem e como eles se chamam?","p":"L","f":[{"n":"Como foram escolhidos os nomes?","p":"M"}]},{"n":"Como você recebeu a notícia da primeira gravidez ou da chegada do primeiro filho?","p":"M","f":[{"n":"Quem foi a primeira pessoa para quem você contou?","p":"L"}]},{"n":"Como foi o dia em que seu primeiro filho nasceu ou chegou?","p":"M","f":[{"n":"O que você sentiu quando o segurou pela primeira vez?","p":"P"}]},{"n":"Como eram seus filhos quando bebês?","p":"M","f":[]},{"n":"Como era a rotina da casa com crianças pequenas?","p":"M","f":[{"n":"Quem ajudava vocês nessa fase?","p":"M"}]},{"n":"Qual foi o momento mais engraçado com seus filhos pequenos?","p":"L","f":[]},{"n":"Qual foi o maior susto que você passou com um filho?","p":"M","f":[]},{"n":"Quais valores você mais quis passar para seus filhos?","p":"M","f":[{"n":"Você acha que conseguiu? Como percebe isso hoje?","p":"P"}]},{"n":"O que foi mais difícil em criar filhos?","p":"P","f":[]},{"n":"Há algo que você faria diferente como mãe ou pai?","p":"P","f":[]},{"n":"O que você sentiu quando seus filhos saíram de casa ou ficaram independentes?","p":"M","f":[]},{"n":"O que você mais admira em cada um dos seus filhos hoje?","p":"P","f":[]},{"n":"Se você gestou seus filhos, como foi a gravidez?","p":"M","f":[]},{"n":"Que músicas ou histórias você cantava ou contava para seus filhos dormirem?","p":"L","f":[]},{"n":"De qual fase dos seus filhos você mais gostou?","p":"M","f":[]},{"n":"Como foi, para você, a adolescência dos seus filhos?","p":"M","f":[]}],"b":[]},{"t":"Trabalho: fora e dentro de casa","d":"Do primeiro emprego à aposentadoria, ou a vida dedicada à casa e à família. Quem viveu os dois responde aos dois caminhos.","q":[{"n":"Ao longo da vida, você trabalhou fora, se dedicou à casa e à família em tempo integral, ou fez os dois?","p":"L","f":[{"n":"Isso mudou em diferentes fases da vida? Como?","p":"M"}]},{"n":"Qual foi o seu primeiro emprego?","p":"L","f":[{"n":"Quanto você ganhava e como usava esse dinheiro?","p":"L"},{"n":"O que você aprendeu nesse primeiro emprego?","p":"M"}],"b":"A"},{"n":"Quais foram os principais trabalhos que você teve ao longo da vida?","p":"L","f":[],"b":"A"},{"n":"Você escolheu sua profissão ou ela aconteceu por acaso?","p":"M","f":[],"b":"A"},{"n":"De qual trabalho você mais gostou? Por quê?","p":"M","f":[],"b":"A"},{"n":"Como era um dia típico no trabalho de que você mais gostou?","p":"M","f":[],"b":"A"},{"n":"Teve algum chefe ou colega importante na sua trajetória?","p":"M","f":[],"b":"A"},{"n":"Qual foi a situação mais engraçada que aconteceu no trabalho?","p":"L","f":[],"b":"A"},{"n":"De qual conquista profissional você mais se orgulha?","p":"M","f":[],"b":"A"},{"n":"Houve algum momento de crise no trabalho, como uma demissão ou um negócio que não deu certo?","p":"P","f":[{"n":"Como você se reergueu?","p":"P"}],"b":"A"},{"n":"Como você equilibrava trabalho e família?","p":"M","f":[{"n":"Você sentiu que precisou abrir mão de algo por causa do trabalho?","p":"P"}],"b":"A"},{"n":"Se pudesse escolher outra profissão, qual seria?","p":"M","f":[],"b":"A"},{"n":"Você se aposentou? Como foi essa transição?","p":"M","f":[{"n":"O que você faz com o tempo que antes era do trabalho?","p":"M"}],"b":"A"},{"n":"Você escolheu se dedicar à casa e à família, ou as circunstâncias levaram a isso?","p":"M","f":[{"n":"Como você se sentia com essa escolha naquela época? E hoje?","p":"P"}],"b":"B"},{"n":"Como era um dia comum na sua rotina de casa, do acordar ao dormir?","p":"L","f":[{"n":"Havia alguma hora do dia que era só sua? O que você fazia nela?","p":"M"}],"b":"B"},{"n":"Quem ensinou você a cozinhar, costurar ou cuidar de uma casa?","p":"L","f":[{"n":"Qual foi o primeiro prato que você aprendeu a fazer?","p":"L"},{"n":"Tem alguma receita que só você sabe fazer do jeito certo?","p":"M"}],"b":"B"},{"n":"Qual tarefa da casa você mais gostava de fazer? E qual menos gostava?","p":"L","f":[],"b":"B"},{"n":"Como você organizava as compras, as contas e o dinheiro da casa?","p":"M","f":[{"n":"Qual era o seu truque para fazer o dinheiro render?","p":"M"}],"b":"B"},{"n":"Você fazia algum trabalho para ganhar um dinheiro extra, como costura, doces, salgados, artesanato ou revenda?","p":"M","f":[{"n":"Como começou, e quem eram os seus clientes?","p":"M"},{"n":"Qual encomenda você nunca esqueceu?","p":"L"}],"b":"B"},{"n":"Quem ajudava você nas tarefas da casa e no cuidado com os filhos?","p":"M","f":[{"n":"Você sentia que o seu trabalho em casa era reconhecido pela família?","p":"P"}],"b":"B"},{"n":"Você cuidou de outros parentes além dos filhos, como pais, sogros ou netos?","p":"M","f":[{"n":"O que essa experiência de cuidar ensinou a você?","p":"P"}],"b":"B"},{"n":"Você participava da vida da comunidade, como a escola dos filhos, a igreja, uma associação ou a vizinhança?","p":"M","f":[],"b":"B"},{"n":"Qual foi a situação mais engraçada que aconteceu na lida da casa?","p":"L","f":[],"b":"B"},{"n":"De qual conquista da vida em casa você mais se orgulha?","p":"M","f":[],"b":"B"},{"n":"Como a sua rotina mudou quando os filhos cresceram e saíram de casa?","p":"M","f":[],"b":"B"},{"n":"Você teve vontade de trabalhar fora ou estudar alguma coisa? O que aconteceu com essa vontade?","p":"P","f":[{"n":"Se pudesse voltar no tempo, faria a mesma escolha?","p":"P"}],"b":"B"},{"n":"O que você gostaria que seus filhos entendessem sobre o trabalho que você fazia em casa?","p":"P","f":[],"b":"B"}],"b":[{"k":"A","t":"Trabalho fora de casa","d":"Para quem teve emprego, negócio próprio ou trabalhou por conta."},{"k":"B","t":"Casa e família","d":"Para quem cuidou da casa, dos filhos e da família em tempo integral."}]},{"t":"Casas e lugares","d":"Os endereços que guardam capítulos da sua vida.","q":[{"n":"Em quantas casas ou cidades você já morou?","p":"L","f":[{"n":"Qual delas foi a mais especial? Por quê?","p":"M"}]},{"n":"Qual foi a primeira casa que você pôde chamar de sua?","p":"M","f":[{"n":"Como foi conquistar esse lugar?","p":"M"}]},{"n":"Como era a vizinhança nos lugares onde você morou?","p":"M","f":[{"n":"Teve algum vizinho marcante?","p":"L"}]},{"n":"Qual cômodo da casa era o coração da família?","p":"M","f":[]},{"n":"Houve alguma mudança de casa ou cidade que foi difícil para você?","p":"P","f":[]},{"n":"Qual cheiro, som ou detalhe faz você lembrar de uma casa antiga?","p":"M","f":[]},{"n":"Como era a decoração da casa da sua família? Tinha algum objeto especial?","p":"L","f":[]},{"n":"Existe algum objeto que você guarda há muitos anos? Qual é a história dele?","p":"M","f":[]}],"b":[]},{"t":"Amizades","d":"As pessoas que você escolheu para caminhar junto.","q":[{"n":"Quem são os amigos mais antigos que você mantém?","p":"M","f":[{"n":"Como vocês se conheceram?","p":"L"}]},{"n":"Qual amizade mudou a sua vida?","p":"M","f":[]},{"n":"O que você faz para manter uma amizade viva?","p":"M","f":[]},{"n":"Você já perdeu uma amizade importante? O que aconteceu?","p":"P","f":[{"n":"Você gostaria de reencontrar essa pessoa?","p":"P"}]},{"n":"Qual foi a maior prova de amizade que você recebeu?","p":"M","f":[]},{"n":"Com qual amigo você mais deu risada? Conte uma história.","p":"L","f":[]},{"n":"Você tem algum amigo que virou família?","p":"M","f":[]},{"n":"Qual foi a festa ou reunião com amigos mais divertida?","p":"L","f":[]}],"b":[]},{"t":"Viagens e aventuras","d":"Lugares visitados, perrengues e sonhos de destino.","q":[{"n":"Qual é a primeira viagem de que você se lembra?","p":"L","f":[]},{"n":"Qual foi a viagem mais marcante da sua vida?","p":"L","f":[{"n":"Com quem você foi e o que tornou essa viagem especial?","p":"M"}]},{"n":"Você já andou de avião? Como foi a primeira vez?","p":"L","f":[]},{"n":"Algo já deu muito errado em uma viagem? Conte.","p":"M","f":[]},{"n":"Qual lugar você visitou que mais te surpreendeu?","p":"M","f":[]},{"n":"Existe algum lugar que você ainda sonha em conhecer?","p":"M","f":[{"n":"O que atrai você nesse lugar?","p":"M"}]},{"n":"Qual foi a maior aventura que você já viveu, perto ou longe de casa?","p":"M","f":[]},{"n":"Qual foi a comida mais diferente que você já provou em uma viagem?","p":"L","f":[]},{"n":"Você prefere praia, campo ou cidade? Por quê?","p":"L","f":[]}],"b":[]},{"t":"O mundo à sua volta","d":"Os acontecimentos, as tecnologias e as mudanças que você testemunhou.","q":[{"n":"Qual acontecimento histórico mais marcou você?","p":"M","f":[{"n":"Onde você estava e como ficou sabendo?","p":"M"}]},{"n":"Você lembra de preços de coisas do dia a dia quando era jovem?","p":"L","f":[]},{"n":"Quando você viu pela primeira vez uma TV, um telefone ou um computador?","p":"L","f":[{"n":"Qual tecnologia mais mudou a sua vida?","p":"M"}]},{"n":"Como a sua cidade mudou ao longo da sua vida?","p":"M","f":[]},{"n":"Que costumes da sua juventude desapareceram e deixam saudade?","p":"M","f":[]},{"n":"O que melhorou no mundo desde que você era criança?","p":"M","f":[]},{"n":"Como você viveu os períodos de crise no país, como crises econômicas ou a pandemia?","p":"M","f":[]},{"n":"Você lembra de alguma Copa do Mundo ou outro evento esportivo marcante?","p":"L","f":[]},{"n":"Qual invenção você acha que foi a mais importante do seu tempo?","p":"M","f":[]},{"n":"Como era a vida em comunidade e a relação entre vizinhos antigamente?","p":"M","f":[]},{"n":"Que conselho você daria para quem está crescendo no mundo de hoje?","p":"M","f":[]}],"b":[]},{"t":"Desafios e superações","d":"Os momentos difíceis e o que eles ensinaram.","q":[{"n":"Qual foi o momento mais difícil da sua vida?","p":"P","f":[{"n":"Quem ou o que ajudou você a atravessar esse momento?","p":"P"},{"n":"O que você aprendeu com isso?","p":"P"}]},{"n":"Qual foi a perda que mais doeu em você?","p":"P","f":[{"n":"Como você guarda a memória dessa pessoa hoje?","p":"P"}]},{"n":"Houve alguma decisão que mudou completamente o rumo da sua vida?","p":"P","f":[]},{"n":"Você já precisou recomeçar do zero? Como foi?","p":"P","f":[]},{"n":"Qual foi o maior medo que você enfrentou?","p":"M","f":[]},{"n":"Do que você se arrepende?","p":"P","f":[]},{"n":"Do que você mais se orgulha em si mesmo?","p":"M","f":[]},{"n":"Houve um momento em que você precisou pedir ou oferecer perdão?","p":"P","f":[]},{"n":"Como você lidou com os períodos de doença, seus ou de alguém próximo?","p":"P","f":[]},{"n":"Em que situação você mostrou mais coragem?","p":"M","f":[]}],"b":[]},{"t":"Gostos e favoritos","d":"Comidas, músicas, manias e pequenos prazeres.","q":[{"n":"Qual é a sua comida preferida hoje?","p":"L","f":[{"n":"Tem alguma receita sua que a família adora? Qual?","p":"L"}]},{"n":"Qual é a sua música preferida de todos os tempos?","p":"L","f":[{"n":"Ela lembra algum momento especial?","p":"M"}]},{"n":"Qual livro, filme ou novela marcou você?","p":"L","f":[]},{"n":"Qual é a sua época do ano preferida?","p":"L","f":[]},{"n":"Qual é o seu passatempo favorito?","p":"L","f":[{"n":"Como você começou a gostar disso?","p":"M"}]},{"n":"Você é mais de acordar cedo ou de dormir tarde?","p":"L","f":[]},{"n":"Qual é o seu lugar preferido no mundo?","p":"L","f":[]},{"n":"Você tem alguma mania ou superstição?","p":"L","f":[]},{"n":"O que sempre faz você rir?","p":"L","f":[]},{"n":"Qual pequeno prazer do dia a dia você não troca por nada?","p":"M","f":[]},{"n":"Qual presente você mais gostou de dar a alguém?","p":"M","f":[]},{"n":"Qual é a sua bebida preferida?","p":"L","f":[]},{"n":"Qual é o cheiro de que você mais gosta?","p":"L","f":[]},{"n":"Qual é a sua cor preferida?","p":"L","f":[]}],"b":[]},{"t":"Valores e crenças","d":"O que guia suas escolhas e como você vê a vida.","q":[{"n":"Quais valores guiaram a sua vida?","p":"M","f":[{"n":"Quem ensinou esses valores a você?","p":"M"}]},{"n":"A fé ou a espiritualidade teve algum papel na sua vida?","p":"M","f":[{"n":"Isso mudou ao longo dos anos?","p":"M"}]},{"n":"Alguma opinião importante sua mudou com o tempo? Qual, e por quê?","p":"P","f":[]},{"n":"O que é felicidade para você?","p":"M","f":[]},{"n":"O que é sucesso para você?","p":"M","f":[]},{"n":"Qual é o melhor conselho que você já recebeu?","p":"M","f":[{"n":"Quem deu esse conselho?","p":"L"}]},{"n":"Que causa ou assunto mobiliza você?","p":"M","f":[]},{"n":"Que injustiça revolta você?","p":"P","f":[]},{"n":"O que você acha que acontece depois que a gente parte?","p":"P","f":[]},{"n":"Que tipo de pessoa você admira?","p":"M","f":[]},{"n":"Qual regra de vida você nunca quebra?","p":"M","f":[]}],"b":[]},{"t":"Maturidade e o presente","d":"Quem você é hoje, os netos e os planos que ainda tem.","q":[{"n":"Como é um dia comum na sua vida hoje?","p":"L","f":[]},{"n":"O que faz você feliz hoje em dia?","p":"M","f":[]},{"n":"O que é melhor na sua idade atual?","p":"M","f":[{"n":"E o que é mais difícil?","p":"M"}]},{"n":"Você tem netos? Como foi a chegada do primeiro?","p":"M","f":[{"n":"O que muda ao ser avó ou avô, em comparação a ser mãe ou pai?","p":"M"},{"n":"O que vocês gostam de fazer juntos?","p":"L"}]},{"n":"Que planos e sonhos você ainda tem?","p":"M","f":[]},{"n":"O que você gostaria de aprender?","p":"L","f":[]},{"n":"Como você se sente em relação ao envelhecimento?","p":"P","f":[]},{"n":"Quem são as pessoas mais importantes na sua vida hoje?","p":"M","f":[]},{"n":"Como você cuida de si mesmo hoje?","p":"M","f":[]},{"n":"O que você sabe hoje que gostaria de ter sabido aos 30 anos?","p":"M","f":[]},{"n":"Qual foi a última coisa nova que você experimentou?","p":"L","f":[]}],"b":[]},{"t":"Legado e mensagens","d":"O que você quer deixar para quem vem depois.","q":[{"n":"Como você gostaria de ser lembrado?","p":"P","f":[]},{"n":"O que você espera que a sua família nunca esqueça?","p":"P","f":[]},{"n":"Qual lição de vida você quer deixar para os filhos e netos?","p":"P","f":[]},{"n":"Que conselho você daria sobre dinheiro?","p":"M","f":[]},{"n":"Que conselho você daria sobre amor?","p":"M","f":[]},{"n":"Que conselho você daria sobre trabalho?","p":"M","f":[]},{"n":"Que conselho você daria sobre amizade?","p":"M","f":[]},{"n":"Há algo que você nunca disse e gostaria de dizer a alguém?","p":"P","f":[{"n":"Para quem seria, e o que você diria?","p":"P"}]},{"n":"Se a sua vida fosse um livro, qual seria o título?","p":"M","f":[{"n":"Quais seriam os nomes dos capítulos?","p":"M"}]},{"n":"O que você quer que as próximas gerações saibam sobre a nossa família?","p":"P","f":[]},{"n":"Qual objeto seu você gostaria que ficasse com alguém da família? Por quê?","p":"M","f":[]},{"n":"Que receita, música ou tradição você quer que continue na família?","p":"M","f":[]},{"n":"Escreva uma mensagem livre para quem vai ler este livro.","p":"P","f":[]}],"b":[]}];
+const DEPTH = {L:"Leve",M:"Média",P:"Profunda"};
+const EX = {A:"Qual foi o seu primeiro emprego?",B:"Quem ensinou você a cozinhar, costurar ou cuidar de uma casa?"};
+const PATH_TITLE = {A:"Trabalhei fora de casa",B:"Cuidei da casa e da família"};
+const PATH_DESC = {A:"Emprego, negócio próprio ou trabalho por conta.",B:"A casa, os filhos e a família em tempo integral."};
+
+// ids e itens planos
+DATA.forEach((c,ci)=>{
+  c.num=ci+1; const cnt={};
+  c.q.forEach((q,qi)=>{const k=q.b||"";cnt[k]=(cnt[k]||0)+1;q.id=`${ci+1}${k}.${cnt[k]}`;q.ch=ci;
+    q.f.forEach((f,fi)=>{f.id=q.id+String.fromCharCode(97+fi);f.parent=q;f.ch=ci;f.b=q.b;});});
+  if(c.b.length) c.entry=c.q.find(q=>!q.b);
+});
+
+// estado
+const KEY="diario-memorias-prototipo";
+// name/nameAt, answers/au (texto e carimbo de cada resposta), paths/chosen/pu (caminhos do capítulo),
+// pics (fotos: id -> {q,ext,cap,u,del}; o arquivo fica no IndexedDB), gh (sincronização). Fonte e posição não sincronizam.
+const freshState=()=>({name:"",nameAt:0,answers:{},au:{},paths:{},chosen:{},pu:{},pics:{},gh:null,fs:1,last:null});
+let S=freshState();
+try{const s=JSON.parse(localStorage.getItem(KEY)||"null"); if(s) S=Object.assign(S,s);}catch(e){}
+(()=>{const t=Date.now(); if(S.name&&!S.nameAt)S.nameAt=t;
+  Object.keys(S.answers).forEach(k=>{if(!S.au[k])S.au[k]=t;});
+  Object.keys(S.chosen).forEach(k=>{if(!S.pu[k])S.pu[k]=t;});})();
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){} syncHook();}
+function setAns(id,v){if((S.answers[id]||"")===v)return;S.answers[id]=v;S.au[id]=Date.now();}
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const picsOf=q=>Object.entries(S.pics).filter(([,p])=>p.q===q&&!p.del).sort((a,b)=>a[1].u-b[1].u).map(([id])=>id);
+
+// fotos originais ficam no IndexedDB (localStorage não aguenta); urls = cache de objectURL
+let _idb; const idb=()=>_idb||(_idb=new Promise((res,rej)=>{const r=indexedDB.open("diario-fotos",1);r.onupgradeneeded=()=>r.result.createObjectStore("f");r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}));
+const idbTx=(mode,fn)=>idb().then(d=>new Promise((res,rej)=>{const t=d.transaction("f",mode),rq=fn(t.objectStore("f"));t.oncomplete=()=>res(rq&&rq.result);t.onerror=()=>rej(t.error);}));
+const idbPut=(k,v)=>idbTx("readwrite",s=>s.put(v,k));
+const idbGet=k=>idbTx("readonly",s=>s.get(k));
+const idbDel=k=>idbTx("readwrite",s=>s.delete(k));
+const idbHas=async k=>(await idbGet(k))!==undefined;
+const urls={};
+async function photoUrl(id){if(urls[id])return urls[id];let b;try{b=await idbGet(id);}catch(e){}return b?(urls[id]=URL.createObjectURL(b)):null;}
+function hydrate(){app.querySelectorAll("img[data-pid]").forEach(async im=>{const u=await photoUrl(im.dataset.pid); if(u&&im.isConnected)im.src=u;});}
+let view="capa", cur={ch:0,i:0}, sel={A:false,B:false}, confirmReset=false, doneCh=0, syncMsg="";
+if(S.name) view="indice";
+
+// instalar como app (PWA)
+let installEv=null;
+const installed=()=>matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();installEv=e;});
+window.addEventListener("appinstalled",()=>{installEv=null;if(view==="indice")render(true);});
+async function installApp(){
+  if(installEv){installEv.prompt();try{await installEv.userChoice;}catch(e){}installEv=null;return;}
+  const ios=/iphone|ipad|ipod/i.test(navigator.userAgent);
+  toast(ios?"No Safari: toque em Compartilhar e depois em “Adicionar à Tela de Início”.":"No Chrome: toque nos três pontinhos e depois em “Instalar app” ou “Adicionar à tela inicial”.",7000);
+}
+if("serviceWorker" in navigator&&/^https?:$/.test(location.protocol))window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
+
+const SCALES=[0.9,1,1.15,1.3,1.5];
+function applyFs(){document.documentElement.style.setProperty("--k",SCALES[S.fs]);}
+applyFs();
+
+function seq(ci){
+  const c=DATA[ci], out=[];
+  c.q.forEach(q=>{
+    if(q===c.entry) { q.f.forEach(f=>out.push(f)); return; }
+    if(q.b && !(S.paths[ci]||{})[q.b]) return;
+    out.push(q); q.f.forEach(f=>out.push(f));
+  });
+  return out;
+}
+const answered=id=>!!(S.answers[id]&&S.answers[id].trim());
+function chStats(ci){const s=seq(ci);return{n:s.length,done:s.filter(x=>answered(x.id)).length};}
+function totals(){let n=0,d=0;DATA.forEach((c,ci)=>{const s=chStats(ci);n+=s.n;d+=s.done;});return{n,d};}
+const needsChoice=ci=>DATA[ci].b.length&&!S.chosen[ci];
+
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const pad=n=>String(n).padStart(2,"0");
+const flor=(x,y,s,f)=>`<use href="#flor" fill="${f}" transform="translate(${x} ${y}) scale(${s})"/>`;
+const folha=(x,y,r,s,f)=>`<use href="#folha" fill="${f}" transform="translate(${x} ${y}) rotate(${r}) scale(${s})"/>`;
+const botao=(x,y,s,f)=>`<use href="#botao" fill="${f}" transform="translate(${x} ${y}) scale(${s})"/>`;
+const chev=(d)=>`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d==="l"?"M15 6l-6 6 6 6":"M9 6l6 6-6 6"}"/></svg>`;
+const divider=`<svg width="120" height="16" viewBox="0 0 120 16" aria-hidden="true"><path d="M4 8H46M74 8H116" stroke="#f0a9bc" stroke-width="1.4" stroke-linecap="round"/><circle cx="60" cy="8" r="6" fill="#f29bb3"/><circle cx="60" cy="8" r="2.4" fill="#fff4f6"/><circle cx="50" cy="8" r="2" fill="#f8c3d1"/><circle cx="70" cy="8" r="2" fill="#f8c3d1"/></svg>`;
+const topFlowers=`<svg class="deco" style="left:50%;top:0;transform:translateX(-50%)" width="140" height="40" viewBox="160 -14 140 40" aria-hidden="true">${folha(214,8,170,1,"#f7d4de")}${folha(236,6,20,.9,"#e9a3b7")}${flor(228,4,.9,"#f29bb3")}${flor(196,-2,.6,"#f8c3d1")}${flor(262,-2,.6,"#e2708f")}</svg>`;
+const sizer=`<div class="sizer" role="group" aria-label="Tamanho do texto"><button data-a="fs-" aria-label="Diminuir tamanho do texto" ${S.fs<=0?"disabled":""}>A−</button><button data-a="fs+" aria-label="Aumentar tamanho do texto" style="font-size:19px;font-weight:700" ${S.fs>=SCALES.length-1?"disabled":""}>A+</button></div>`;
+function cornerFlowers(){return `
+<svg class="deco" style="left:0;top:0" width="150" height="170" viewBox="0 0 150 170" aria-hidden="true">${folha(40,92,-150,1.5,"#f3c1cf")}${folha(64,40,-80,1.3,"#e9a3b7")}${folha(96,70,-20,1.2,"#f7d4de")}${flor(44,48,2,"#f29bb3")}${flor(104,30,1.2,"#f8c3d1")}${flor(22,124,1.1,"#e2708f")}${botao(132,58,1,"#f5b3c4")}${botao(58,150,.8,"#eba0b4")}</svg>
+<svg class="deco" style="right:0;top:0" width="110" height="150" viewBox="280 0 110 150" aria-hidden="true">${folha(340,58,200,1.3,"#f7d4de")}${folha(356,96,110,1.2,"#e9a3b7")}${flor(352,38,1.5,"#f8c3d1")}${flor(300,22,.9,"#e2708f")}${botao(372,132,.9,"#f29bb3")}</svg>
+<svg class="deco" style="left:0;bottom:0" width="150" height="110" viewBox="0 734 150 110" aria-hidden="true">${folha(10,800,-40,1.6,"#f3c1cf")}${folha(70,830,-100,1.4,"#e9a3b7")}${folha(120,818,-20,1.2,"#f7d4de")}${flor(58,808,1.9,"#e2708f")}${flor(126,832,1.2,"#f8c3d1")}${botao(18,752,1,"#f5b3c4")}</svg>
+<svg class="deco" style="right:0;bottom:0" width="170" height="120" viewBox="220 724 170 120" aria-hidden="true">${folha(380,790,220,1.5,"#f7d4de")}${folha(320,834,-70,1.4,"#e9a3b7")}${folha(278,826,-150,1.1,"#f3c1cf")}${flor(338,800,2.1,"#f29bb3")}${flor(272,836,1,"#f8c3d1")}${flor(378,740,.9,"#e2708f")}${botao(236,832,.8,"#eba0b4")}</svg>`;}
+
+// ---------- telas ----------
+function vCapa(){
+  const has=!!S.name;
+  return `${cornerFlowers()}<div class="cover">
+    <div class="eyebrow">Diário de Memórias</div>
+    <h1>Mãe, qual é<br>a sua história?</h1>${divider}
+    <div class="who"><span class="muted" style="font-size:15px">O livro com histórias de</span><span class="name" id="shownName">${esc(S.name||"[Seu nome]")}</span></div>
+    <form id="capaForm">
+      ${has?"":`<label for="nome">Como você se chama?</label><input id="nome" type="text" placeholder="Escreva seu nome" autocomplete="name" maxlength="40">`}
+      <button class="btn" type="submit">${has?"Abrir o livro":"Salvar e abrir o livro"} ${chev("r")}</button>
+      ${has?`<button class="link" type="button" data-a="rename" style="align-self:center">Trocar o nome</button>`:`<span class="muted" style="font-size:13px;text-align:center">Uma pergunta de cada vez, no seu tempo.</span>`}
+    </form></div>`;
+}
+function resumeTarget(){
+  if(S.last){const s=seq(S.last.ch); if(!needsChoice(S.last.ch)&&s[S.last.i]) return S.last;}
+  for(let ci=0;ci<DATA.length;ci++){ if(needsChoice(ci)) return {ch:ci,i:-1};
+    const s=seq(ci), i=s.findIndex(x=>!answered(x.id)); if(i>-1) return {ch:ci,i}; }
+  return null;
+}
+function vIndice(){
+  const t=totals(), pct=t.n?Math.round(t.d/t.n*100):0, r=resumeTarget();
+  let resume="";
+  if(r){ resume = r.i<0
+      ? `<button class="cont" data-a="open" data-ch="${r.ch}"><span style="flex:1;min-width:0"><small>Próximo passo · Capítulo ${pad(r.ch+1)}</small><b>Escolher o caminho de “${esc(DATA[r.ch].t)}”</b></span>${chev("r")}</button>`
+      : (()=>{const it=seq(r.ch)[r.i];return `<button class="cont" data-a="resume" data-ch="${r.ch}" data-i="${r.i}"><span style="flex:1;min-width:0"><small>${t.d?"Continuar de onde parou":"Começar pela primeira pergunta"} · ${it.id}</small><b>${esc(it.n)}</b></span>${chev("r")}</button>`;})();
+  }
+  const rows=DATA.map((c,ci)=>{
+    const s=chStats(ci), full=s.n>0&&s.done===s.n, go=s.done>0&&!full, nc=needsChoice(ci);
+    const st=nc?`<span class="chip st-go">Escolher caminho</span>`:full?`<span class="chip st-done">Concluído</span>`:go?`<span class="chip st-go">Em andamento</span>`:`<span class="chip st-new">A começar</span>`;
+    const tags=c.b.length?`<span class="paths-tags">${c.b.map(b=>`<span class="${S.chosen[ci]&&!(S.paths[ci]||{})[b.k]?"off":""}">${b.k} · ${b.k==="A"?"Trabalho fora":"Casa e família"}</span>`).join("")}</span>`:"";
+    return `<li><button class="chrow ${full||go?"on":""}" data-a="open" data-ch="${ci}" aria-label="Capítulo ${ci+1}: ${esc(c.t)}, ${s.done} de ${s.n} respondidas">
+      <span class="n">${pad(ci+1)}</span>
+      <span class="mid"><span class="tt">${esc(c.t)}</span>${tags}<span class="bar"><i class="${full?"full":""}" style="width:${s.n?Math.round(s.done/s.n*100):0}%"></i></span></span>
+      <span class="side">${st}<span class="cnt">${s.done}/${s.n}</span></span></button></li>`;
+  }).join("");
+  return `<svg class="deco" style="right:0;top:0" width="110" height="150" viewBox="280 0 110 150" aria-hidden="true">${folha(330,70,200,1.4,"#f7d4de")}${folha(360,104,110,1.3,"#e9a3b7")}${folha(300,30,160,1.1,"#f3c1cf")}${flor(354,42,1.9,"#f29bb3")}${flor(300,18,1,"#f8c3d1")}${flor(378,128,.9,"#e2708f")}${botao(318,96,.9,"#f5b3c4")}</svg>
+  <div class="ihead">
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div class="eyebrow">Diário de Memórias</div>
+      <h1>Mãe, qual é a sua história?</h1>
+      <div class="muted" style="font-size:14px">O livro de <b style="color:var(--accent)">${esc(S.name)}</b>, escrito com carinho</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <div style="display:flex;justify-content:space-between;font-size:13px" class="muted"><span><b style="color:var(--ink);font-size:15px">${t.d}</b> de ${t.n} memórias guardadas</span><span>${pct}%</span></div>
+      <div class="bar" style="height:8px"><i style="width:${pct}%"></i></div>
+      ${ghOn()?`<button class="syncline ${S.gh.err?"err":""}" data-a="sync"><i></i>${esc(syncStatus())}</button>`:""}
+    </div>
+    ${resume}
+  </div>
+  <div class="scroll" style="padding:6px 12px 0;gap:0">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 8px 8px">
+      <h2 class="serif it" style="margin:0;font-weight:400;font-size:21px">Capítulos</h2><span class="muted" style="font-size:12px">da infância ao legado</span>
+    </div>
+    <ol class="chlist">${rows}</ol>
+    ${confirmReset?`<div class="confirm" role="alert"><b>Apagar todas as respostas deste protótipo?</b><span class="muted">O nome, as respostas e os caminhos escolhidos voltam ao começo. Isso não pode ser desfeito.</span><div class="row"><button class="btn soft" data-a="reset-no">Manter</button><button class="btn" data-a="reset-yes">Apagar tudo</button></div></div>`:""}
+    <div class="foot"><button class="link" data-a="capa">Ver a capa</button>${DATA.map((c,ci)=>S.chosen[ci]?`<button class="link" data-a="rechoose" data-ch="${ci}">Mudar caminho do capítulo ${ci+1}</button>`:"").join("")}<button class="link" data-a="sync">Sincronização</button>${installed()?"":`<button class="link" data-a="install">Instalar no celular</button>`}${ghOn()?"":`<button class="link" data-a="reset">Recomeçar protótipo</button>`}</div>
+  </div>`;
+}
+function vEscolha(){
+  const c=DATA[cur.ch], any=sel.A||sel.B;
+  const counts={}; c.b.forEach(b=>{counts[b.k]=c.q.filter(q=>q.b===b.k).reduce((s,q)=>s+1+q.f.length,0);});
+  const n=c.b.reduce((s,b)=>s+(sel[b.k]?counts[b.k]:0),0);
+  const label=sel.A&&sel.B?"Começar pelos dois caminhos":any?`Começar caminho ${sel.A?"A":"B"}`:"Escolha um caminho para começar";
+  return `${topFlowers}<div class="top"><div class="toprow">
+      <button class="icon" data-a="indice" aria-label="Voltar ao índice" style="margin-left:-10px">${chev("l")}</button>
+      <div class="t"><span>Capítulo ${pad(c.num)}</span><span>${esc(c.t)}</span></div>${sizer}</div></div>
+  <div class="scroll">
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <span style="font-size:12px;font-weight:700;color:var(--rose)">Antes de começar</span>
+      <h1 class="h1q">Como foi a sua vida de trabalho?</h1>
+      <p class="lead">Cada história tem o seu jeito. Escolha o caminho que conta melhor a sua. Se você viveu os dois, marque os dois.</p>
+    </div>
+    <div role="group" aria-label="Caminhos do capítulo" style="display:flex;flex-direction:column;gap:12px">
+    ${c.b.map(b=>`<button class="pcard" data-a="pick" data-k="${b.k}" aria-pressed="${!!sel[b.k]}">
+      <span class="r"><span class="k">${b.k}</span><span class="tx"><b>${PATH_TITLE[b.k]||esc(b.t)}</b><span>${PATH_DESC[b.k]||esc(b.d)}</span></span>
+      <span class="ck">${sel[b.k]?`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>`:""}</span></span>
+      <span class="ex"><span class="muted" style="font-size:12px">Por exemplo</span><i>“${esc(EX[b.k]||"")}”</i><b>${counts[b.k]} perguntas</b></span></button>`).join("")}
+    </div>
+    <p class="muted" style="margin:0;display:flex;gap:8px;font-size:13px;line-height:1.45"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>Dá para mudar essa escolha depois, pelo índice. Nada do que já foi escrito se perde.</p>
+  </div>
+  <div class="botbar"><span class="muted" style="font-size:13px;text-align:center">${any?n+" perguntas nos caminhos escolhidos":"Nenhum caminho escolhido"}</span>
+    <button class="btn" data-a="start-paths" ${any?"":"disabled"}>${label}</button></div>`;
+}
+function vPergunta(){
+  const c=DATA[cur.ch], s=seq(cur.ch), it=s[cur.i], nx=s[cur.i+1], p=it.parent;
+  const pa=p?S.answers[p.id]:"";
+  const ph=picsOf(it.id);
+  const branch=it.b?c.b.find(b=>b.k===it.b):null;
+  return `${topFlowers}<div class="top"><div class="toprow">
+      <button class="icon" data-a="indice" aria-label="Voltar ao índice" style="margin-left:-10px">${chev("l")}</button>
+      <div class="t"><span>Capítulo ${pad(c.num)}${branch?" · Caminho "+branch.k:""}</span><span>${esc(c.t)}</span></div>
+      ${sizer}<span class="muted" style="font-size:13px;font-variant-numeric:tabular-nums;margin-left:4px;white-space:nowrap">${cur.i+1} de ${s.length}</span></div>
+    <div class="bar" style="height:5px"><i style="width:${Math.round((cur.i+1)/s.length*100)}%"></i></div></div>
+  <div class="scroll">
+    ${p?`<div class="parent"><span class="lbl">Continuação de ${p.id}</span><span class="q">${esc(p.n)}</span>${pa&&pa.trim()?`<span class="a">“${esc(pa.trim())}”</span>`:""}</div>`:""}
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="qmeta"><span>${it.id}</span><span class="chip ${it.p}">${DEPTH[it.p]}</span></div>
+      <h1 class="qtext">${esc(it.n)}</h1>
+    </div>
+    <div class="ans">
+      <label for="resposta">Sua resposta</label>
+      <textarea id="resposta" placeholder="Escreva com calma, do seu jeito. Pode ser curto ou longo.">${esc(S.answers[it.id]||"")}</textarea>
+      ${ph.length?`<div class="thumbs">${ph.map((pid,k)=>`<figure><img data-pid="${pid}" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" alt="Foto ${k+1} da resposta"><button data-a="rmphoto" data-p="${pid}" aria-label="Remover foto ${k+1}">×</button></figure>`).join("")}</div>`:""}
+      <div class="ansrow">
+        <label class="photo"><input type="file" accept="image/*" multiple id="foto"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-8 8"/></svg>Adicionar foto</label>
+        <span class="note" id="saved">${answered(it.id)?"Guardado com carinho":""}</span>
+      </div>
+      ${ph.length?`<span class="note">${ghOn()?"As fotos vão para o seu cantinho seguro, em tamanho original.":"As fotos ficam guardadas neste aparelho."}</span>`:""}
+    </div>
+    ${nx?`<div class="next"><span class="note">A seguir · ${nx.id}</span><span>${esc(nx.n)}</span></div>`:`<div class="next"><span class="note">Última pergunta deste capítulo</span></div>`}
+    <div style="align-self:center;margin-top:4px">${divider}</div>
+  </div>
+  <div class="actions">
+    <button class="ghost" data-a="prev" aria-label="Pergunta anterior">${chev("l")}</button>
+    <button class="ghost" data-a="skip">Pular</button>
+    <button class="go" data-a="next">Salvar e seguir</button>
+  </div>`;
+}
+function syncStatus(){
+  if(!ghOn())return "Sincronização desligada";
+  if(SYNC.busy)return "Sincronizando…";
+  if(S.gh.err)return S.gh.err;
+  return S.gh.last?"Guardado no GitHub · "+new Date(S.gh.last).toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}):"Ainda não sincronizou";
+}
+function vSync(){
+  const on=ghOn();
+  return `${topFlowers}<div class="top"><div class="toprow">
+      <button class="icon" data-a="indice" aria-label="Voltar ao índice" style="margin-left:-10px">${chev("l")}</button>
+      <div class="t"><span>Ajustes</span><span>Sincronização</span></div></div></div>
+  <div class="scroll">
+    <p class="lead">${on?"As respostas e as fotos (em tamanho original) são copiadas para um repositório privado no GitHub, e este aparelho fica igual aos outros que usarem o mesmo.":"Liga este aparelho a um repositório privado no GitHub. Assim as respostas e as fotos ficam guardadas fora do celular e iguais em todos os aparelhos."}</p>
+    ${on?`<div class="confirm"><b>${esc(S.gh.repo)}</b><span class="${S.gh.err?"":"muted"}" style="${S.gh.err?"color:var(--accent-ink);font-weight:600":""}">${esc(syncStatus())}</span>
+      <div class="row"><button class="btn" data-a="syncnow" ${SYNC.busy?"disabled":""}>Sincronizar agora</button></div></div>
+      <button class="link" data-a="syncoff" style="align-self:center">Desligar neste aparelho</button>`
+    :`<form class="sform" id="syncForm">
+      <label for="ghrepo">Repositório de dados</label>
+      <input id="ghrepo" type="text" placeholder="usuario/diario-dados" autocapitalize="off" autocomplete="off" spellcheck="false">
+      <label for="ghtok">Token do GitHub</label>
+      <input id="ghtok" type="password" placeholder="github_pat_…" autocomplete="off" spellcheck="false">
+      <button class="btn" type="submit">Conectar e sincronizar</button>
+      <span class="note">O token só fica neste aparelho. Passo a passo em docs/sincronizacao.md.</span></form>`}
+  </div>`;
+}
+function vFim(){
+  const c=DATA[doneCh], s=chStats(doneCh), last=doneCh===DATA.length-1, nxt=DATA[doneCh+1];
+  return `${cornerFlowers()}<div class="done">
+    <div class="eyebrow">Capítulo ${pad(c.num)} concluído</div>
+    <h1>${last?"Você chegou ao fim do livro":esc(c.t)}</h1>${divider}
+    <div class="stats"><div><b>${s.done}</b><span>respondidas</span></div><div><b>${s.n-s.done}</b><span>para depois</span></div></div>
+    <p class="muted" style="margin:0;max-width:30ch">${last?"Cada resposta aqui é um pedaço da sua história guardado para a família.":"As perguntas puladas continuam esperando no índice, para quando você quiser."}</p>
+    <div class="btns">
+      ${last?"":`<button class="btn" data-a="open" data-ch="${doneCh+1}">Próximo: ${esc(nxt.t)} ${chev("r")}</button>`}
+      <button class="btn soft" data-a="indice">Voltar ao índice</button>
+    </div></div>`;
+}
+
+// ---------- sincronização via GitHub (repositório privado de dados) ----------
+// Mesmo desenho do KaraTube: respostas.json + fotos/<pergunta>-<id>.<ext>. Mescla por registro, vence o maior carimbo (u).
+// Resposta apagada vira texto vazio com carimbo novo; foto removida vira del:true (o arquivo fica no repositório).
+const SYNC={busy:false,timer:null,applying:false,lastTry:0};
+const ghOn=()=>!!(S.gh&&S.gh.token&&S.gh.repo);
+const b64=b=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(",")[1]);r.onerror=()=>rej(r.error);r.readAsDataURL(b);});
+const b64Text=t=>{const u=new TextEncoder().encode(t);let s="";for(let i=0;i<u.length;i+=8192)s+=String.fromCharCode.apply(null,u.subarray(i,i+8192));return btoa(s);};
+async function gh(path,o){
+  o=o||{};const g=S.gh;
+  const r=await fetch("https://api.github.com/repos/"+g.repo+path,{method:o.method||"GET",cache:"no-store",
+    headers:Object.assign({Authorization:"Bearer "+g.token,Accept:o.accept||"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28"},o.body?{"Content-Type":"application/json"}:{}),
+    body:o.body?JSON.stringify(o.body):undefined});
+  if(!r.ok){const e=new Error("HTTP "+r.status);e.status=r.status;throw e;}
+  return o.bin?r.blob():o.text?r.text():(r.status===204?null:r.json());
+}
+function ghErrMsg(e){
+  if(!e)return "Erro desconhecido.";
+  if(e.status===401)return "Token inválido ou expirado. Gere outro no GitHub.";
+  if(e.status===403)return "O GitHub recusou (limite de uso ou token sem permissão).";
+  if(e.status===404)return "Repositório não encontrado, ou o token não tem acesso a ele.";
+  if(e.message==="Failed to fetch"||e.name==="TypeError")return "Sem conexão com o GitHub.";
+  return "Falha na sincronização: "+(e.message||"erro");
+}
+async function ghTree(){
+  const g=S.gh;
+  if(!g.branch){const info=await gh("");g.branch=info.default_branch||"main";}
+  try{const t=await gh("/git/trees/"+encodeURIComponent(g.branch)+"?recursive=1");
+    const m={};(t.tree||[]).forEach(x=>{if(x.type==="blob")m[x.path]=x.sha;});return m;
+  }catch(e){if(e.status===404||e.status===409)return {};throw e;} // repositório vazio
+}
+const ghText=sha=>gh("/git/blobs/"+sha,{accept:"application/vnd.github.raw+json",text:true});
+const ghFile=sha=>gh("/git/blobs/"+sha,{accept:"application/vnd.github.raw+json",bin:true});
+const ghPutB64=(path,content,sha,msg)=>gh("/contents/"+path.split("/").map(encodeURIComponent).join("/"),{method:"PUT",body:{message:msg,content,branch:S.gh.branch,sha:sha||undefined}});
+const picPath=(id,p)=>"fotos/"+p.q+"-"+id+"."+p.ext;
+
+function serialize(){
+  const paths={};Object.keys(S.pu).forEach(k=>{const p=S.paths[k]||{};paths[k]={A:!!p.A,B:!!p.B,chosen:!!S.chosen[k],u:S.pu[k]};});
+  const answers={};Object.keys(S.au).forEach(k=>{answers[k]={t:S.answers[k]||"",u:S.au[k]};});
+  return JSON.stringify({app:"diario-de-memorias",v:1,at:Date.now(),name:S.name?{v:S.name,u:S.nameAt}:undefined,paths,answers,pics:S.pics});
+}
+function mergeRemote(rem){
+  const st={local:0,remote:0};
+  const rn=rem.name;
+  if(rn&&rn.v&&(rn.u||0)>(S.nameAt||0)){S.name=rn.v;S.nameAt=rn.u;st.local++;}
+  else if(S.name&&(S.nameAt||0)>((rn||{}).u||0))st.remote++;
+  const rp=rem.paths||{};
+  new Set([...Object.keys(S.pu),...Object.keys(rp)]).forEach(k=>{
+    const l=S.pu[k]||0,x=rp[k]||{},r=x.u||0;
+    if(r>l){S.paths[k]={A:!!x.A,B:!!x.B};S.chosen[k]=!!x.chosen;S.pu[k]=r;st.local++;}
+    else if(l>r)st.remote++;
+  });
+  const ra=rem.answers||{};
+  new Set([...Object.keys(S.au),...Object.keys(ra)]).forEach(id=>{
+    const l=S.au[id]||0,x=ra[id]||{},r=x.u||0;
+    if(r>l){S.answers[id]=x.t||"";S.au[id]=r;st.local++;}
+    else if(l>r)st.remote++;
+  });
+  const rf=rem.pics||{};
+  new Set([...Object.keys(S.pics),...Object.keys(rf)]).forEach(id=>{
+    const l=S.pics[id],x=rf[id];
+    if(x&&(!l||(x.u||0)>(l.u||0))){S.pics[id]={q:x.q,ext:x.ext,cap:x.cap||"",u:x.u||0,del:!!x.del};st.local++;}
+    else if(l&&(!x||(l.u||0)>(x.u||0)))st.remote++;
+  });
+  return st;
+}
+const nAns=a=>Object.values(a||{}).filter(x=>((x&&x.t!==undefined?x.t:x)||"").trim()).length;
+
+// Atualiza a tela depois de sincronizar, sem atrapalhar quem está digitando.
+function syncRefresh(changed){
+  if(/^(INPUT|TEXTAREA)$/.test((document.activeElement||{}).tagName||""))return;
+  if(view==="pergunta"){
+    if(!seq(cur.ch)[cur.i]){go("indice");return;}
+    if(changed)render(true);
+    return;
+  }
+  render(true);
+}
+async function ghSyncNow(manual){
+  if(!ghOn()||SYNC.busy)return;
+  if(!navigator.onLine){if(manual)toast("Sem internet. Tento de novo quando voltar.");return;}
+  SYNC.busy=true;SYNC.lastTry=Date.now();syncMsg="Sincronizando…";syncRefresh(false);
+  const g=S.gh;let summary="",changed=0;
+  try{
+    for(let attempt=0;attempt<3;attempt++){
+      const tree=await ghTree();
+      let rem={};const sha=tree["respostas.json"];
+      if(sha)rem=JSON.parse(await ghText(sha));
+      if(!g.last&&nAns(S.answers)&&nAns(rem.answers)&&!confirm("Este aparelho já tem "+nAns(S.answers)+" respostas e o GitHub já tem "+nAns(rem.answers)+". Juntar os dois?"))
+        throw Object.assign(new Error("cancel"),{cancel:true});
+      SYNC.applying=true;
+      const stat=mergeRemote(rem);
+      // fotos que vieram do GitHub (baixa o arquivo) e fotos removidas (apaga o arquivo local)
+      for(const [pid,p] of Object.entries(S.pics)){
+        if(p.del){await idbDel(pid).catch(()=>{});if(urls[pid]){URL.revokeObjectURL(urls[pid]);delete urls[pid];}continue;}
+        const path=picPath(pid,p);
+        if(tree[path]&&!(await idbHas(pid))){try{await idbPut(pid,await ghFile(tree[path]));stat.local++;}catch(e){}}
+      }
+      // fotos novas daqui, em tamanho original
+      let up=0;
+      for(const [pid,p] of Object.entries(S.pics)){
+        if(p.del)continue;const path=picPath(pid,p);
+        if(!tree[path]){const b=await idbGet(pid);
+          if(b){try{await ghPutB64(path,await b64(b),null,"Foto "+p.q);up++;}catch(e){if(e.status!==422)throw e;}}}
+      }
+      if(!sha||stat.remote>0||up>0){
+        try{await ghPutB64("respostas.json",b64Text(serialize()),sha,"Diário de Memórias");}
+        catch(e){if((e.status===409||e.status===422)&&attempt<2){SYNC.applying=false;continue;}throw e;}
+      }
+      g.last=Date.now();g.err="";changed=stat.local;
+      summary=stat.local?"Atualizado com "+stat.local+(stat.local===1?" mudança":" mudanças")+" do GitHub.":"Tudo em dia.";
+      save();
+      break;
+    }
+    syncMsg=summary;if(manual)toast(summary);
+  }catch(e){
+    if(e.cancel)syncMsg="Sincronização cancelada.";
+    else{g.err=ghErrMsg(e);syncMsg=g.err;if(manual)toast(g.err,5000);}
+    save();
+  }finally{SYNC.busy=false;SYNC.applying=false;syncRefresh(changed>0);}
+}
+function syncSoon(ms){if(!ghOn())return;clearTimeout(SYNC.timer);SYNC.timer=setTimeout(()=>ghSyncNow(false),ms||10000);}
+function syncHook(){if(SYNC.applying||!ghOn())return;syncSoon(10000);}
+window.addEventListener("online",()=>syncSoon(2000));
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&ghOn()&&Date.now()-SYNC.lastTry>120000)syncSoon(1500);});
+
+// ---------- render e ações ----------
+const app=document.getElementById("app");
+function render(focus){
+  app.innerHTML = ({capa:vCapa,indice:vIndice,escolha:vEscolha,pergunta:vPergunta,fim:vFim,sync:vSync})[view]();
+  if(view==="pergunta"){
+    const ta=document.getElementById("resposta"), it=seq(cur.ch)[cur.i];
+    let tm; ta.addEventListener("input",()=>{setAns(it.id,ta.value);clearTimeout(tm);
+      tm=setTimeout(()=>{save();document.getElementById("saved").textContent=ta.value.trim()?"Guardado com carinho":"";},400);});
+    document.getElementById("foto").addEventListener("change",async e=>{
+      const fs=[...e.target.files]; e.target.value=""; if(!fs.length) return;
+      setAns(it.id,ta.value);
+      try{for(const f of fs){
+        const id=uid(), ext=((f.name.match(/\.(\w{2,5})$/)||[])[1]||(f.type.split("/")[1]||"jpg")).toLowerCase().replace("jpeg","jpg");
+        await idbPut(id,f); S.pics[id]={q:it.id,ext,cap:"",u:Date.now()};}
+      }catch(err){toast("Não consegui guardar a foto neste aparelho.",4000);}
+      save(); render(true);});
+  }
+  if(view==="sync"){
+    const f=document.getElementById("syncForm");
+    if(f) f.addEventListener("submit",e=>{e.preventDefault();
+      const repo=document.getElementById("ghrepo").value.trim().replace(/^https?:\/\/github\.com\//,"").replace(/\.git$/,""), token=document.getElementById("ghtok").value.trim();
+      if(!/^[\w.-]+\/[\w.-]+$/.test(repo)){toast("Escreva o repositório assim: usuario/nome-do-repositorio");return;}
+      if(!token){toast("Cole o token do GitHub.");return;}
+      S.gh={repo,token,branch:"",last:0,err:""};save();syncMsg="";render(true);ghSyncNow(true);});
+  }
+  hydrate();
+  if(view==="capa"){
+    const inp=document.getElementById("nome");
+    if(inp) inp.addEventListener("input",()=>{document.getElementById("shownName").textContent=inp.value.trim()||"[Seu nome]";});
+    document.getElementById("capaForm").addEventListener("submit",e=>{e.preventDefault();
+      if(inp){const v=inp.value.trim(); if(!v){inp.focus();inp.setAttribute("aria-invalid","true");toast("Escreva seu nome para abrir o livro.");return;} S.name=v;S.nameAt=Date.now();save();}
+      go("indice");});
+  }
+  const sc=app.querySelector(".scroll"); if(sc && !focus) sc.scrollTop=0;
+}
+function go(v){view=v;confirmReset=false;render();window.scrollTo(0,0);}
+function openCh(ci){
+  cur.ch=ci;
+  if(needsChoice(ci)){sel=Object.assign({A:false,B:false},S.paths[ci]||{});go("escolha");return;}
+  const s=seq(ci); const i=s.findIndex(x=>!answered(x.id));
+  cur.i=i<0?0:i; S.last={ch:ci,i:cur.i}; save(); go("pergunta");
+}
+function step(d){
+  const s=seq(cur.ch); const ta=document.getElementById("resposta");
+  if(ta){setAns(s[cur.i].id,ta.value);}
+  const ni=cur.i+d;
+  if(ni<0){save();go("indice");return;}
+  if(ni>=s.length){doneCh=cur.ch;S.last=null;save();go("fim");return;}
+  cur.i=ni;S.last={ch:cur.ch,i:ni};save();render();
+}
+let tt;function toast(m,ms){let t=document.querySelector(".toast");if(!t){t=document.createElement("div");t.className="toast";t.setAttribute("role","status");document.body.appendChild(t);}t.textContent=m;t.hidden=false;clearTimeout(tt);tt=setTimeout(()=>t.hidden=true,ms||2400);}
+
+app.addEventListener("click",e=>{
+  const b=e.target.closest("[data-a]"); if(!b) return;
+  const a=b.dataset.a;
+  if(a==="fs-"||a==="fs+"){
+    const ta=document.getElementById("resposta"); if(ta) setAns(seq(cur.ch)[cur.i].id,ta.value);
+    S.fs=Math.max(0,Math.min(SCALES.length-1,S.fs+(a==="fs+"?1:-1)));applyFs();save();render(true);return;}
+  if(a==="indice") { const ta=document.getElementById("resposta"); if(ta){setAns(seq(cur.ch)[cur.i].id,ta.value);save();} go("indice"); }
+  if(a==="sync"){const ta=document.getElementById("resposta"); if(ta){setAns(seq(cur.ch)[cur.i].id,ta.value);save();} go("sync");}
+  if(a==="syncnow") ghSyncNow(true);
+  if(a==="install") installApp();
+  if(a==="syncoff"){ if(confirm("Desligar a sincronização neste aparelho? As respostas e fotos continuam aqui e no GitHub.")){S.gh=null;syncMsg="";save();render(true);} }
+  if(a==="capa") go("capa");
+  if(a==="rename"){S.name="";save();render();}
+  if(a==="open") openCh(+b.dataset.ch);
+  if(a==="resume"){cur={ch:+b.dataset.ch,i:+b.dataset.i};go("pergunta");}
+  if(a==="rechoose"){const ci=+b.dataset.ch;cur.ch=ci;sel=Object.assign({A:false,B:false},S.paths[ci]||{});go("escolha");}
+  if(a==="pick"){sel[b.dataset.k]=!sel[b.dataset.k];render(true);}
+  if(a==="start-paths"){
+    const ci=cur.ch,c=DATA[ci]; S.paths[ci]={A:!!sel.A,B:!!sel.B}; S.chosen[ci]=true; S.pu[ci]=Date.now();
+    setAns(c.entry.id,sel.A&&sel.B?"Fiz os dois: trabalhei fora e cuidei da casa e da família.":sel.A?"Trabalhei fora de casa.":"Me dediquei à casa e à família.");
+    save(); openCh(ci);}
+  if(a==="prev") step(-1);
+  if(a==="skip"||a==="next") step(1);
+  if(a==="rmphoto"){const id=seq(cur.ch)[cur.i].id;const ta=document.getElementById("resposta");if(ta)setAns(id,ta.value);
+    const p=S.pics[b.dataset.p]; if(p){p.del=true;p.u=Date.now();idbDel(b.dataset.p).catch(()=>{});} save();render(true);}
+  if(a==="reset"){confirmReset=true;render(true);setTimeout(()=>{const c=app.querySelector(".confirm");c&&c.scrollIntoView({block:"center"});},0);}
+  if(a==="reset-no"){confirmReset=false;render(true);}
+  if(a==="reset-yes"){const fs=S.fs;S=freshState();S.fs=fs;save();go("capa");}
+});
+render();
+if(ghOn()) setTimeout(()=>ghSyncNow(false),3500);
+</script>
+
+</body>
+</html>
