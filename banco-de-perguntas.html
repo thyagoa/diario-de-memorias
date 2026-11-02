@@ -187,7 +187,7 @@ const matches=x=>(st.d==="all"||x.p===st.d)&&(!st.q||norm(x.n).includes(norm(st.
 const depth=p=>`<span class="depth ${p}" title="${NAMES[p]}"><i></i><i></i><i></i></span>`;
 const row=(x)=>`<div class="row"><input type="checkbox" id="c-${x.id}" data-id="${x.id}" ${sel.has(x.id)?"checked":""} aria-label="Selecionar ${x.id}">
   <label class="id" for="c-${x.id}">${x.id}</label>
-  <div class="txt">${hl(x.n)}${x.parent?`<span class="dep">depende de ${x.parent.id}</span>`:""}</div>${depth(x.p)}</div>`;
+  <div class="txt">${hl(x.n)}${x.r?`<span class="dep">aposentada: não é oferecida a quem ainda não respondeu</span>`:""}${x.parent?`<span class="dep">depende de ${x.parent.id}</span>`:""}</div>${depth(x.p)}</div>`;
 
 function render(){
   let html="",toc="",total=0;
