@@ -1,6 +1,6 @@
 // Service worker: o app abre sem internet. Shell em "stale-while-revalidate"; fontes do Google ficam em cache.
 // A API do GitHub (sincronização) e o resto passam direto.
-const CACHE = 'diario-1794417728';
+const CACHE = 'diario-1794418315';
 const SHELL = ['./', 'index.html', 'manifest.webmanifest', 'icon.svg', 'icon-192.png', 'icon-512.png', 'icon-180.png'];
 const EXTRA = ['fonts.googleapis.com', 'fonts.gstatic.com'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting())); });
